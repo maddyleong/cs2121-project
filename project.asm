@@ -1,5 +1,6 @@
-
 .include "m2560def.inc"
+
+.def temp = r17
 
 .macro do_lcd_command
 	ldi r16, @0
@@ -13,10 +14,10 @@
 .endmacro
 
 .org 0
-	jmp RESET
+	jmp START
 
 
-RESET:
+START:
 	ldi r16, low(RAMEND)
 	out SPL, r16
 	ldi r16, high(RAMEND)
@@ -40,20 +41,29 @@ RESET:
 	do_lcd_command 0b00000110 ; increment, no display shift
 	do_lcd_command 0b00001110 ; Cursor on, bar, no blink
 
-	do_lcd_data 'C'
-	do_lcd_data 'O'
-	do_lcd_data 'M'
-	do_lcd_data 'P'
 	do_lcd_data '2'
 	do_lcd_data '1'
 	do_lcd_data '2'
+	do_lcd_data '1'
+	do_lcd_data ' '
+	do_lcd_data '1'
+	do_lcd_data '6'
+	do_lcd_data 's'
 	do_lcd_data '1'
 	do_lcd_command 0b11000000
-	do_lcd_data 'L'
+	do_lcd_data 'S'
 	do_lcd_data 'a'
-	do_lcd_data 'b'
+	do_lcd_data 'f'
+	do_lcd_data 'e'
 	do_lcd_data ' '
-	do_lcd_data '4'
+	do_lcd_data 'C'
+	do_lcd_data 'r'
+	do_lcd_data 'a'
+	do_lcd_data 'c'
+	do_lcd_data 'k'
+	do_lcd_data 'e'
+	do_lcd_data 'r'
+	
 
 
 
@@ -139,4 +149,3 @@ sleep_5ms:
 	rcall sleep_1ms
 	rcall sleep_1ms
 	ret
-
