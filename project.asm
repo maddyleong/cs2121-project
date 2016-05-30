@@ -1,17 +1,37 @@
 .include "m2560def.inc"
 
-.def temp = r17
 
 .macro do_lcd_command
 	ldi r16, @0
 	rcall lcd_command
 	rcall lcd_wait
 .endmacro
+
 .macro do_lcd_data
 	ldi r16, @0
 	rcall lcd_data
 	rcall lcd_wait
 .endmacro
+
+.macro initialise_function
+	push temp			;save conflict registers
+	push YH
+	push YL
+	push r22
+	push r23
+	in temp, SREG			;save status register
+	push temp
+.end macro
+
+.macro finalise_function
+	pop temp			;pop status register
+	out SREG, temp			
+	pop r23
+	pop r22
+	pop YL
+	pop YH
+	pop temp
+.end macro
 
 .org 0
 	jmp START
@@ -149,3 +169,11 @@ sleep_5ms:
 	rcall sleep_1ms
 	rcall sleep_1ms
 	ret
+	
+LEFT_BUTTON:
+	initialise_function
+	;insert printy things here
+	finalise_function
+	reti
+	
+	
