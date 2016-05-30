@@ -61,6 +61,7 @@ START:
 	do_lcd_command 0b00000110 ; increment, no display shift
 	do_lcd_command 0b00001110 ; Cursor on, bar, no blink
 
+	;start screen
 	do_lcd_data '2'
 	do_lcd_data '1'
 	do_lcd_data '2'
@@ -70,7 +71,7 @@ START:
 	do_lcd_data '6'
 	do_lcd_data 's'
 	do_lcd_data '1'
-	do_lcd_command 0b11000000
+	do_lcd_command 0b11000000	;move to next line
 	do_lcd_data 'S'
 	do_lcd_data 'a'
 	do_lcd_data 'f'
@@ -170,6 +171,7 @@ sleep_5ms:
 	rcall sleep_1ms
 	ret
 	
+;starting countdown screen
 LEFT_BUTTON:
 	initialise_function
 	
@@ -190,7 +192,7 @@ LEFT_BUTTON:
 	do_lcd_data '.'
 	do_lcd_data '.'
 	do_lcd_data '.'
-	rcall sleep_1ms
+	;insert 1 second delay
 	
 	do_lcd_command 0b00010101	
 	do_lcd_data 'S'
@@ -209,6 +211,7 @@ LEFT_BUTTON:
 	do_lcd_data '.'
 	do_lcd_data '.'
 	do_lcd_data '.'
+	;insert 1 second delay
 
 	do_lcd_command 0b00010101	
 	do_lcd_data 'S'
@@ -227,8 +230,41 @@ LEFT_BUTTON:
 	do_lcd_data '.'
 	do_lcd_data '.'
 	do_lcd_data '.'
+	;insert 1 second delay
 	
 	finalise_function
 	reti
+	rjmp RESET
+
+;resetting the POT screen
+RESET:
+	do_lcd_command 0b00000001		;clear display
+	do_lcd_command 0b00000011		;set cursor to top left
+	do_lcd_data 'R'
+	do_lcd_data 'e'
+	do_lcd_data 's'
+	do_lcd_data 'e'
+	do_lcd_data 't'
+	do_lcd_data ' '
+	do_lcd_data 'P'
+	do_lcd_data 'O'
+	do_lcd_data 'T'
+	do_lcd_data ' '
+	do_lcd_data 't'
+	do_lcd_data 'o'
+	do_lcd_data ' '
+	do_lcd_data '0'
+	do_lcd_command 0b11000000
+	do_lcd_data 'R'
+	do_lcd_data 'e'
+	do_lcd_data 'm'
+	do_lcd_data 'a'
+	do_lcd_data 'i'
+	do_lcd_data 'n'
+	do_lcd_data 'g'
+	do_lcd_data ':'
+	do_lcd_data ' '
+	do_lcd_data '' ;<-----number of seconds, need to input
+	
 	
 	
