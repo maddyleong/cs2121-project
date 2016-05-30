@@ -172,7 +172,62 @@ sleep_5ms:
 	
 LEFT_BUTTON:
 	initialise_function
-	;insert printy things here
+	
+	do_lcd_command 0b00010101		;sets cursor to beginning of second line
+	do_lcd_data 'S'
+	do_lcd_data 't'
+	do_lcd_data 'a'
+	do_lcd_data 'r'
+	do_lcd_data 't'
+	do_lcd_data 'i'
+	do_lcd_data 'n'
+	do_lcd_data 'g'
+	do_lcd_data ' '
+	do_lcd_data 'i'
+	do_lcd_data 'n'
+	do_lcd_data ' '
+	do_lcd_data '3'
+	do_lcd_data '.'
+	do_lcd_data '.'
+	do_lcd_data '.'
+	rcall sleep_1ms
+	
+	do_lcd_command 0b00010101	
+	do_lcd_data 'S'
+	do_lcd_data 't'
+	do_lcd_data 'a'
+	do_lcd_data 'r'
+	do_lcd_data 't'
+	do_lcd_data 'i'
+	do_lcd_data 'n'
+	do_lcd_data 'g'
+	do_lcd_data ' '
+	do_lcd_data 'i'
+	do_lcd_data 'n'
+	do_lcd_data ' '
+	do_lcd_data '2'
+	do_lcd_data '.'
+	do_lcd_data '.'
+	do_lcd_data '.'
+
+	do_lcd_command 0b00010101	
+	do_lcd_data 'S'
+	do_lcd_data 't'
+	do_lcd_data 'a'
+	do_lcd_data 'r'
+	do_lcd_data 't'
+	do_lcd_data 'i'
+	do_lcd_data 'n'
+	do_lcd_data 'g'
+	do_lcd_data ' '
+	do_lcd_data 'i'
+	do_lcd_data 'n'
+	do_lcd_data ' '
+	do_lcd_data '1'
+	do_lcd_data '.'
+	do_lcd_data '.'
+	do_lcd_data '.'
+	
 	finalise_function
 	reti
 	
