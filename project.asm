@@ -280,7 +280,32 @@ RESET:
 
 ;Finding the POT position 
 FIND_POT:
+	do_lcd_data 'F'
+	do_lcd_data 'i'
+	do_lcd_data 'n'
+	do_lcd_data 'd'
+	do_lcd_data ' '
+	do_lcd_data 'P'
+	do_lcd_data 'O'
+	do_lcd_data 'T'
+	do_lcd_data ' '
+	do_lcd_data 'P'
+	do_lcd_data 'o'
+	do_lcd_data 's'
+	do_lcd_command 0b11000000
+	do_lcd_data 'R'
+	do_lcd_data 'e'
+	do_lcd_data 'm'
+	do_lcd_data 'a'
+	do_lcd_data 'i'
+	do_lcd_data 'n'
+	do_lcd_data 'g'
+	do_lcd_data ':'
+	do_lcd_data ' '
+	do_lcd_data '' ;<------ time counting down from the previous screen (not reset)
 	
+	;cpi time, 0
+	;breq TIMEOUT
 
 	
 ;timeout screen	
