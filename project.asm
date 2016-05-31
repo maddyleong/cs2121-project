@@ -34,7 +34,7 @@
 .end macro
 
 .org 0
-	jmp START
+	jmp START`
 
 ;start screen
 START:
@@ -88,7 +88,7 @@ START:
 
 
 
-halt:
+HALT:
 	rjmp halt
 
 .equ LCD_RS = 7
@@ -332,7 +332,7 @@ TIMEOUT:
 	
 	;detect any keypad/push button is pressed
 	
-	rjmp START ;or breq START depending how the above^ code works
+	jmp START ;or breq START depending how the above^ code works
 	
 	
 	
