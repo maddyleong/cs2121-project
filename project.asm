@@ -36,7 +36,7 @@
 .org 0
 	jmp START
 
-
+;start screen
 START:
 	ldi r16, low(RAMEND)
 	out SPL, r16
@@ -171,7 +171,7 @@ sleep_5ms:
 	rcall sleep_1ms
 	ret
 	
-;starting countdown screen
+;starting countdown 
 LEFT_BUTTON:
 	initialise_function
 	
@@ -236,8 +236,14 @@ LEFT_BUTTON:
 	reti
 	rjmp RESET
 
-;resetting the POT screen
+;resetting the POT 
 RESET:
+	ldi temp1, (3 << REFS0) | (0 << ADLAR) | (0 << MUX0)
+	sts ADMUX, temp1
+	ldi temp2, (1 << MUX5)
+	sts ADCSRB, temp2
+	ldi temp3, (1 <<ADEN) | (1 << ADSC) | (1 << ADIE) | (5 << ADPS0)
+	
 	do_lcd_command 0b00000001		;clear display
 	do_lcd_command 0b00000011		;set cursor to top left
 	do_lcd_data 'R'
@@ -266,5 +272,46 @@ RESET:
 	do_lcd_data ' '
 	do_lcd_data '' ;<-----number of seconds, need to input
 	
+	cpi ADCH:ADCL, 0
+	brne TIMEOUT
+	;insert 1 second delay	
+	
+	rjmp FIND_POT
+
+;Finding the POT position 
+FIND_POT:
+	
+
+	
+;timeout screen	
+TIMEOUT:
+	do_lcd_data 'G'
+	do_lcd_data 'a'
+	do_lcd_data 'm'
+	do_lcd_data 'e'
+	do_lcd_data ' '
+	do_lcd_data 'o'
+	do_lcd_data 'v'
+	do_lcd_data 'e'
+	do_lcd_data 'r'
+	do_lcd_command 0b11000000
+	do_lcd_data 'Y'
+	do_lcd_data 'o'
+	do_lcd_data 'u'
+	do_lcd_data ' '
+	do_lcd_data 'L'
+	do_lcd_data 'o'
+	do_lcd_data 's'
+	do_lcd_data 'e'
+	do_lcd_data '!'
+	
+	;detect any keypad/push button is pressed
+	
+	rjmp START ;or breq START depending how the above^ code works
 	
 	
+	
+
+
+
+
