@@ -1,5 +1,15 @@
 .include "m2560def.inc"
 
+.equ PATTERN = 0b11110000
+.def temp1 = r18
+
+.macro clear				;clears a word in a memory
+	ldi YL, low(@0)			;load memory address
+	ldi YH, high(@0)
+	clr temp1
+	st Y+, temp1
+	st Y, temp1
+.endmacro
 
 .macro do_lcd_command
 	ldi r16, @0
@@ -33,8 +43,77 @@
 	pop temp
 .end macro
 
-.org 0
-	jmp START`
+.dseg
+SecondCounter:
+	.byte 2
+TempCounter:
+	.byte 2
+
+.cseg
+
+.org 0x0000
+	jmp SECOND
+	jmp DEFAULT			;no handling for IRQ0
+	jmp DEFAULT			;no handling for IRQ1
+.org OVF0addr
+	jmp Time0OVF
+	jmp DEFAULT
+	
+DEFAULT:
+	reti
+	
+;initialise stack pointer	
+SECOND:
+	ldi temp, high(RAMEND)
+	out SPH, temp
+	ldi temp3, low(RAMEND)
+	out SPL, temp
+	
+	ser temp			;set port C as output
+	out DDRC, temp
+	
+	rjmp main
+
+;interrupt subroutine to Timer0
+Timer0OVF:
+	in temp, SREG
+	push temp
+	push YH
+	push YL
+	push r25
+	push r24
+	
+	lds r24, TempCounter
+	lds r25, TempCounter+1
+	adiw r25:r24, 1
+	
+	cpi r24, low(7812)		;7812 = 10^6/128
+	ldi temp, high(7812)
+	cpc r25, temp
+	brne NotSecond
+	clear TempCounter
+	
+	lds r24, SecondCounter
+	lds r25, SecondCounter+1
+	adiw r25:r24, 1
+	sts SecondCounter, r24
+	sts SecondCounter+1, r25
+	rjmp EndIF
+
+;store the new value of the temporary counter
+NotSecond:
+	sts TempCounter, r24
+	sts TempCounter, r25
+	
+EndIF:
+	pop r24
+	pop r25
+	pop YL
+	pop YH
+	pop temp
+	out SREG, temp
+	reti
+	
 
 ;start screen
 START:
@@ -103,9 +182,7 @@ HALT:
 	cbi PORTA, @0
 .endmacro
 
-;
 ; Send a command to the LCD (r16)
-;
 
 lcd_command:
 	out PORTF, r16
@@ -238,11 +315,18 @@ LEFT_BUTTON:
 
 ;resetting the POT 
 RESET:
-	ldi temp1, (3 << REFS0) | (0 << ADLAR) | (0 << MUX0)
-	sts ADMUX, temp1
-	ldi temp2, (1 << MUX5)
-	sts ADCSRB, temp2
-	ldi temp3, (1 <<ADEN) | (1 << ADSC) | (1 << ADIE) | (5 << ADPS0)
+	
+	clr r17 				;set K as input
+	sts DDRK, r16
+	
+	ldi r17,  (3 << REFS0) | (0 << ADLAR) | (0 << MUX0)	;set up POT and ADConverter
+	sts ADMUX, r17
+	ldi r17, (1 << MUX5)
+	sts ADCSRB, r17
+	ldi r17, (1 <<ADEN) | (1 << ADSC) | (1 << ADIE) | (5 << ADPS0)	
+	sts ADCSRA, r17				;this sets it to auto update
+	lds r18, ADCL
+	lds r19, ADCH
 	
 	do_lcd_command 0b00000001		;clear display
 	do_lcd_command 0b00000011		;set cursor to top left
@@ -272,7 +356,7 @@ RESET:
 	do_lcd_data ' '
 	do_lcd_data '' ;<-----number of seconds, need to input
 	
-	cpi ADCH:ADCL, 0
+	cpi ADCL:ADCH, 0
 	brne TIMEOUT
 	;insert 1 second delay	
 	
