@@ -64,20 +64,20 @@ DEFAULT:
 	
 ;initialise stack pointer	
 SECOND:
-	ldi temp, high(RAMEND)
-	out SPH, temp
+	ldi temp3, high(RAMEND)
+	out SPH, temp3
 	ldi temp3, low(RAMEND)
-	out SPL, temp
+	out SPL, temp3
 	
-	ser temp			;set port C as output
-	out DDRC, temp
+	ser temp3			;set port C as output
+	out DDRC, temp3
 	
 	rjmp main
 
 ;interrupt subroutine to Timer0
 Timer0OVF:
-	in temp, SREG
-	push temp
+	in temp3, SREG
+	push temp3
 	push YH
 	push YL
 	push r25
@@ -88,8 +88,8 @@ Timer0OVF:
 	adiw r25:r24, 1
 	
 	cpi r24, low(7812)		;7812 = 10^6/128
-	ldi temp, high(7812)
-	cpc r25, temp
+	ldi temp3, high(7812)
+	cpc r25, temp3
 	brne NotSecond
 	clear TempCounter
 	
@@ -110,8 +110,8 @@ EndIF:
 	pop r25
 	pop YL
 	pop YH
-	pop temp
-	out SREG, temp
+	pop temp3
+	out SREG, temp3
 	reti
 	
 
@@ -247,6 +247,15 @@ sleep_5ms:
 	rcall sleep_1ms
 	rcall sleep_1ms
 	ret
+
+sleep_1s:
+	clear TempCounter
+	clear SecondCounter
+	out TCCR0A, temp3
+	out TCCR0B, temp3
+	ldi temp3, 1<<TOIE0
+	sts TIMSK0, temp3
+	sei
 	
 ;starting countdown 
 LEFT_BUTTON:
@@ -269,7 +278,7 @@ LEFT_BUTTON:
 	do_lcd_data '.'
 	do_lcd_data '.'
 	do_lcd_data '.'
-	;insert 1 second delay
+	rcall sleep_1s
 	
 	do_lcd_command 0b00010101	
 	do_lcd_data 'S'
@@ -288,8 +297,8 @@ LEFT_BUTTON:
 	do_lcd_data '.'
 	do_lcd_data '.'
 	do_lcd_data '.'
-	;insert 1 second delay
-
+	rcall sleep_1s
+	
 	do_lcd_command 0b00010101	
 	do_lcd_data 'S'
 	do_lcd_data 't'
@@ -307,7 +316,7 @@ LEFT_BUTTON:
 	do_lcd_data '.'
 	do_lcd_data '.'
 	do_lcd_data '.'
-	;insert 1 second delay
+	rcall sleep_1s
 	
 	finalise_function
 	reti
@@ -356,14 +365,16 @@ RESET:
 	do_lcd_data ' '
 	do_lcd_data '' ;<-----number of seconds, need to input
 	
-	cpi ADCL:ADCH, 0
+	cpi ADCL:ADCH, 0 ;if this doesn't work, put ADCH and ADCH into registers and adiw r24:r23,0 or something similar
 	brne TIMEOUT
-	;insert 1 second delay	
+	rcall sleep_1s	
 	
 	rjmp FIND_POT
 
 ;Finding the POT position 
 FIND_POT:
+	do_lcd_command 0b00000001		;clear display
+	do_lcd_command 0b00000011		;set cursor to top left
 	do_lcd_data 'F'
 	do_lcd_data 'i'
 	do_lcd_data 'n'
@@ -390,10 +401,20 @@ FIND_POT:
 	
 	;cpi time, 0
 	;breq TIMEOUT
+	
+	;while within 16 raw adc counts of correct position
+	;all leds lit
+	;if within 32
+	;all leds except top one lit
+	;if within 48
+	;bottom 8 leds lit
+	;else, all leds off
 
 	
 ;timeout screen	
 TIMEOUT:
+	do_lcd_command 0b00000001		;clear display
+	do_lcd_command 0b00000011		;set cursor to top left
 	do_lcd_data 'G'
 	do_lcd_data 'a'
 	do_lcd_data 'm'
@@ -418,7 +439,39 @@ TIMEOUT:
 	
 	jmp START ;or breq START depending how the above^ code works
 	
+;game is complete
+COMPLETE:
+	do_lcd_command 0b00000001		;clear display
+	do_lcd_command 0b00000011		;set cursor to top left
+	do_lcd_data 'G'
+	do_lcd_data 'a'
+	do_lcd_data 'm'
+	do_lcd_data 'e'
+	do_lcd_data ' '
+	do_lcd_data 'c'
+	do_lcd_data 'o'
+	do_lcd_data 'm'
+	do_lcd_data 'p'
+	do_lcd_data 'l'
+	do_lcd_data 'e'
+	do_lcd_data 't'
+	do_lcd_data 'e'
+	do_lcd_command 0b11000000
+	do_lcd_data 'Y'
+	do_lcd_data 'o'
+	do_lcd_data 'u'
+	do_lcd_data ' '
+	do_lcd_data 'W'
+	do_lcd_data 'i'
+	do_lcd_data 'n'
+	do_lcd_data '!'
 	
+	;strobe led flashing at a rate of 2Hz
+	
+	;detect any button is pressed
+	
+	jmp START ;or breq START depending how the above^ code works
+
 	
 
 
